@@ -1,0 +1,34 @@
+map_ratings_1(K = null, V = (user_id,movie_id,movie_rating,timestamp)):
+	emit(movie_id,(movie_rating,1))
+
+reduce_ratings_1(K = movie_id, LIST_V = [(movie_rating,1)]):
+	sum_movie_rating <- 0					//the sum of the ratings submitted for the movie with id = movie_id
+	ratings_counter <- 0					//the number of the ratings submitted for the movie with id = movie_id
+	for each (movie_rating,1) in LIST_V:
+		sum_movie_rating += movie_ratings
+		ratings_counter += 1
+	emit(movie_id,(sum_movie_rating,ratings_counter))
+
+map_ratings_2(K = movie_id, V = (sum_movie_rating,ratings_counter)):
+	avg_movie_rating <- sum_movie_rating/ratings_counter
+	emit(movie_id,avg_movie_rating)
+	
+map_genres(K = null, V = (movie_id,movie_genre)):
+	emit(movie_id,movie_genre)
+	
+JOIN map_ratings_2, map_genres ---> emit(movie_id,(avg_movie_rating,movie_genre))
+
+map(K = movie_id, V = (avg_movie_rating,movie_genre)):
+	emit(movie_genre,(avg_movie_rating,1))
+	
+reduce(K = movie_genre, LIST_V = [(avg_movie_rating,1)])
+	sum_of_avg_movie_ratings <- 0				//the sum of the average ratings of the movies with genre = movie_genre
+	total_movies_counter <- 0				//the number of the average ratings of the movies with genre = movie_genre
+	for each (avg_movie_rating,1) in LIST_V:	
+		sum_of_avg_movie_ratings += avg_movie_rating
+		total_movies_counter += 1	
+	emit(movie_genre, (sum_of_avg_movie_ratings,total_movies_counter))
+	
+map(K = movie_genre, LIST_V = [(avg_movie_rating,1)]):
+	avg_genre_rating <- sum_of_avg_movie_ratings/total_movies_counter
+	emit(movie_genre,avg_genre_rating,total_movies_counter)

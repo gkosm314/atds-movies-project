@@ -1,0 +1,37 @@
+map(K = null, V = (user_id,movie_id,movie_rating,timestamp)):
+	emit(user_id,(movie_rating,1))
+
+
+reduce(K = user_id, LIST_V = [(movie_rating,1)]):
+	sum_user_rating <- 0				//the sum of the ratings submitted by the user with id = user_id
+	ratings_counter <- 0				//the number of the ratings submitted by the user with id = user_id
+	for each (movie_rating,1) in LIST_V:
+		sum_user_rating += movie_ratings
+		ratings_counter += 1
+	emit(user_id,(sum_user_rating,ratings_counter))
+	
+	
+map(K = user_id, V = (sum_user_rating,ratings_counter)):
+	avg_rating <- sum_user_rating/ratings_counter
+	
+	//we will emit(1,(X,1)), where X is either 0 or 1 <=> a flag regarding if this particular user has avg_rating > 3.0
+	//in each case the key = 1 => all pairs will go to the same reducer at the next step
+	
+	if(avg_rating > 3):
+		emit(1,(1,1)) 	
+	else:
+		emit(1,(0,1))
+		
+		
+reduce(K = 1, LIST_V = [(user_has_avg_rating_greater_than_three_flag,1)]):
+	users_with_avg_rating_greater_than_tree_counter <- 0
+	total_users_counter <- 0
+	for each (user_has_avg_rating_greater_than_three_flag,1) in LIST_V:
+		users_with_avg_rating_greater_than_tree_counter += user_has_avg_rating_greater_than_three_flag
+		total_users_counter += 1
+	emit(1,(users_with_avg_rating_greater_than_tree_counter,total_users_counter))
+	
+	
+map(K = 1, V = (users_with_avg_rating_greater_than_tree_counter,total_users_counter)):
+	percentage = (users_with_avg_rating_greater_than_tree_counter/total_users_counter)*100
+	emit(percentage)

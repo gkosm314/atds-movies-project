@@ -1,0 +1,46 @@
+map_genres(K = null, V = (movie_id,movie_genre)):
+	if movie_genre == "Drama":
+		emit(movie_id,movie_genre)
+	else:
+		do not emit
+		
+map_movies(K = null, V = (movie_id,movie_title,movie_description,timestamp,duration,cost,earnings,popularity)):
+	
+	if movie_description == '' or timestamp = '':
+		do not emit
+	
+	year <- extract year from timestamp
+	desc_length <- number of words in movie_description
+	
+	if year >= 2000 and year <= 2004:
+		period <- "2000-2004"
+	elif year >= 2005 and year <= 2009:
+		period <- "2005-2009"
+	elif year >= 2010 and year <= 2014:
+		period <- "2010-2014"
+	elif year >= 2015 and year <= 2019:
+		period <- "2015-2019"
+	else:
+		period <- "invalid"
+		
+	if period != "invalid":
+		emit(movie_id,(desc_length,period))
+	else:
+		do not emit
+		
+JOIN map_movies, map_genres ---> emit(movie_id,(desc_length,period,movie_genre))
+
+map(K = movie_id, V = (desc_length,period,movie_genre)):
+	emit(period,(desc_length,1))
+	
+reduce(K = period, LIST_V = [(desc_length,1)]):
+	sum_desc_length <- 0					//the sum of lengths of movie descriptions for movies whose period = K
+	movie_counter <- 0					//the number of movie descriptions for movies whose period = K 
+	for each (desc_length,1) in LIST_V:
+		sum_desc_length += desc_length
+		movie_counter += 1
+	emit(period,(sum_desc_length,movie_counter))		
+	
+map(K = period, V = (sum_desc_length,movie_counter)):
+	percentage = (sum_desc_length/movie_counter)*100
+	emit(period,percentage)

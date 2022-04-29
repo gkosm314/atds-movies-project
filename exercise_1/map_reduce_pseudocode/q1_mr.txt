@@ -1,0 +1,14 @@
+map(K = null, V = (movie_id,movie_title,movie_description,timestamp,duration,cost,earnings,popularity)):
+	year <- extract year from timestamp
+	if(year = '' or cost = '' or earning = '' or year < 2000):
+		do not emit
+	else:
+		profit <- ((earnings-cost)/cost)*100
+		emit(year,(movie_title,profit))
+		
+reduce(K = year, LIST_V = [(movie_title,profit)]):
+	for each (movie_title,profit) in LIST_V:
+		if profit > max_profit:
+			max_movie_title <- movie_title
+			max_profit <- profit
+	emit(year,(max_movie_title,max_profit))

@@ -1,0 +1,44 @@
+map_ratings(K = null, V = (user_id,movie_id,movie_rating,timestamp)):
+	emit(movie_id,(user_id,movie_rating))
+
+map_genres(K = null, V = (movie_id,movie_genre)):
+	emit(movie_id,movie_genre)
+	
+map_movies(K = null, V = (movie_id,movie_title,movie_description,timestamp,duration,cost,earnings,popularity)):
+	emit(movie_id,(movie_title,popularity))
+	
+JOIN map_genres, map_movies  ---> emit(movie_id,(movie_genre,(movie_title,popularity)))
+JOIN map_ratings,(map_genres, map_movies) ---> emit(movie_id,((user_id,movie_rating),(movie_genre,(movie_title,popularity))))
+
+map(K = movie_id, V = ((user_id,movie_rating),(movie_genre,(movie_title,popularity)))):
+	emit((movie_genre,user_id), (1, (movie_title, movie_rating, popularity), (movie_title, movie_rating, popularity)))
+	
+reduce(K = (movie_genre,user_id), LIST_V = [(1, (movie_title, movie_rating, popularity), (movie_title, movie_rating, popularity))]):
+	user_ratings_counter <- 0
+	
+	for each (1, (movie_title, movie_rating, popularity), (movie_title, movie_rating, popularity)) in LIST_V:
+		user_ratings_counter += 1
+	
+		if (movie_rating > max_movie_rating) OR (movie_rating == max_movie_rating AND popularity > max_popularity):
+			max_movie_title <- movie_title
+			max_movie_rating <- movie_rating
+			max_popularity <- popularity
+			
+		if (movie_rating < min_movie_rating) OR (movie_rating == min_movie_rating AND popularity > min_popularity):
+			min_movie_title <- movie_title
+			min_movie_rating <- movie_rating
+			min_popularity <- popularity			
+			
+	//Find best and worst movie for each pair (genre,user)		
+	emit((movie_genre,user_id), (user_ratings_counter, (max_movie_title, max_movie_rating, max_popularity), (min_movie_title, min_movie_rating, min_popularity)))
+	
+map(K = (movie_genre,user_id), V = (user_ratings_counter, (max_movie_title, max_movie_rating, max_popularity), (min_movie_title, min_movie_rating, min_popularity))):
+	emit(movie_genre, (user_id,user_ratings_counter,max_movie_title,max_movie_rating,min_movie_title,min_movie_rating))
+
+reduce(K = movie_genre, LIST_V = [(user_ratings_counter,max_movie_title,max_movie_rating,min_movie_title,min_movie_rating)]):
+	for each (user_ratings_counter,max_movie_title,max_movie_rating,min_movie_title,min_movie_rating) in LIST_V:
+		if(user_ratings_counter > max_ratings_counter):
+			max_V <- (user_ratings_counter,max_movie_title,max_movie_rating,min_movie_title,min_movie_rating)
+			
+	//Find user with maximum number of ratings and return his best and worst movie of genre = KEY
+	emit(movie_genre, max_V)
