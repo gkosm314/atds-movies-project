@@ -23,4 +23,6 @@ The aforementioned executions were compared with regard to their execution times
 
 ## Exercise 2
 
-The second part of the assignment involved both the implementation and the performance comparison of two different MapReduce join algorithms, namely the **broadcast join** and the **repartition join**. Both joins are extensively presented in _" A Comparison of Join Algorithms for Log Processing in MapReduce”, Blanas et al , in Sigmod 2010"_.
+The second part of the assignment involved both the implementation and the performance comparison of two different MapReduce join algorithms, namely the **broadcast join** and the **repartition join**.
+
+Both joins are extensively presented in _" A Comparison of Join Algorithms for Log Processing in MapReduce”, Blanas et al , in Sigmod 2010"_.
