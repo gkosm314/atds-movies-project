@@ -16,7 +16,7 @@ The first part of the assignment demanded the execution of five different querie
 * using SparkSQL
 * using SparkSQL and the Parquet file format for the input
 
-The aforementioned executions were compared with regard to their execution times. The comparison led to an understanding regarding:
+The aforementioned executions were compared with regard to their execution times. The comparison led to an understanding of:
 * the I/O and aggregation queries performance improvement from the use of the Parquet file format
 * the effect of the Catalyst Optimizer on the performance of the SparkSQL queries
 * the overhead related to the use of user-defined functions
